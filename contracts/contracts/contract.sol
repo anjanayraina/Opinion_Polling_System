@@ -10,15 +10,15 @@ function balanceOf(address , uint256  ) external  view returns (uint256);
 }
 contract MainContract{
 
-address public user;
+address public owner;
 uint256 nextVote;
 uint256[] public validTokens;
 polygonScanInterface scan  ;
 
 constructor() {
-    user = msg.sender;
+        owner = msg.sender;
         nextVote = 1;
-        scan = IdaoContract(0x2953399124F0cBB46d2CbACD8A89cF0599974963);
+        scan = polygonScanInterface(0x2953399124F0cBB46d2CbACD8A89cF0599974963);
         validTokens = [62547879379941470948936947827609172963088532413507950376145110324425623863297];
                         
 
@@ -120,6 +120,37 @@ constructor() {
         temp.voteStatus[msg.sender] = true;
 
         emit Vote(  votingEventID , msg.sender,votedOn ,  temp.votesUp, temp.votesDown, );
+    }
+
+
+    function getResults(uint256 votingEventID ) public {
+
+    require(msg.sender == owner , "Only the owner is allowed to count the votes!!");
+    require(allVotingsp[votingEventID].exists , "Please select a valid Voting Event!!");
+    require(allVotings[votingEventID].deadline > block.number , "Please wait for the deadline to pass to Count the votes");
+    require(!allVotings[votingEventID].countConducted  , "You have already got the result of the poll !!");
+    VotingEvent storage temp = allVotings[votingEvent];
+    
+    if(temp.votesup < temp.votesDown){
+
+        temp.passed = false;
+    }
+
+    else {
+
+        temp.passed = true;
+    }
+
+    temp.countConducted = true;
+    emit voteResult(votingEventID , temp.passed);
+
+
+    }
+
+     function addTokenId(uint256 votingTokenID) public {
+        require(msg.sender == owner, "Only Owner Can Add Tokens");
+
+        validTokens.push(votingTokenID);
     }
 
     }
